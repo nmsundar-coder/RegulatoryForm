@@ -1,0 +1,14 @@
+.logoutStyle {
+  color: black;
+  
+  background-color: darkgrey;
+  width: 4%;
+  padding: 12px;
+}
+
+.usernameStyle {
+  font-size: 18px;
+  text-align: left;
+  font-weight: bold;
+  
+}

@@ -1,0 +1,78 @@
+.buttonStyle {
+  display: block;
+  height: 76px;
+  width: 150px;
+  background-size: 45px 45px;
+  background-position: center 10px;
+  background-repeat: no-repeat;
+  font-size: 12px;
+  color: #6e29bd;
+  text-align: inherit;
+  padding: 0;
+  margin: 0;
+  font-weight: normal;
+  text-shadow: none;
+  
+}
+
+.buttonStyle1{
+  text-align: left;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+form input {
+  display: block;
+  width: 100%;
+  font-size: 20px;
+  padding: 5px 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+form input.error {
+  border-color: red;
+}
+
+form button:disabled {
+  background-color: #dbf99f;
+  color: #333;
+}
+
+form button.small {
+  display: inline-block;
+  width: auto;
+  padding: 0 20px;
+  background-color: #777;
+  font-size: 14px;
+}
+
+form button.small:hover {
+  background-color: #999;
+}
+
+.shareholder {
+  display: flex;
+  direction: row;
+  align-items: center;
+}
+
+.shareholder button {
+  margin: 0;
+  margin-left: 10px;
+}
+
+
+.declarationStyle{
+
+  text-align: center;
+
+}
+
+.textStyle{
+  text-align: left;
+  
+}
