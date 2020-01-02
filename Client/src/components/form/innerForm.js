@@ -3,6 +3,9 @@ import "antd/dist/antd.css";
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {saveAnnualDisclosure} from '../../actions/annualDisclosure'
+import { createNotification } from "../../utils/helpers";
+import lang from "../../langs";
+
 
 import {
   Form,
@@ -33,9 +36,11 @@ class RegistrationForm extends React.Component {
           values.immediateRelatives= this.props.immediateRelatives
           values.otherPersons= this.props.otherPersons
           values.mobileNumber = values.prefix+' '+values.mobileNumber;
-          console.log(values)
-
           this.props.saveAnnualDisclosure(values)
+          createNotification("success", lang("formsubmitted"));
+          this.props.history.push("/innerform");
+
+          
         }else{
           alert("Please select the declaration before submitting the form")
         }

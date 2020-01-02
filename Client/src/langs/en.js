@@ -12,6 +12,7 @@ const en = () => {
     ["Excel", "Export Report to CSV"],
     ["logout", "Log out"],
     ["success.login", "Login Success !"],
+    ["formsubmitted", "Form Submitted Successfully !"],
     [
       "error.server_unknown",
       "Your request cannot be processed Right now. Please contact administrator"

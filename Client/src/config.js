@@ -3,5 +3,5 @@ module.exports = {
   ttl: 3600000,
   tokenKey: "key_jwt",
   lang_id: "en",
-  url: "http://192.168.15.16:9003"
+  url: "http://localhost:9003"
 };

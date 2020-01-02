@@ -9,7 +9,7 @@ var router = express.Router();
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./swagger.json");
 
-var validator = require('gstin-validator');
+var validator = require("gstin-validator");
 
 router.post("/register", (req, res, next) => {
   let newUser = new User({
@@ -22,7 +22,7 @@ router.post("/register", (req, res, next) => {
 
   User.addUser(newUser, (err, user) => {
     if (err) {
-      console.log(err)
+      console.log(err);
       res.json({ success: false, msg: "Failed to save user" });
     } else {
       res.json({ success: true, msg: "User Added Successfully" });
@@ -33,7 +33,7 @@ router.post("/register", (req, res, next) => {
 router.post("/authenticate", (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  
+
   console.log(password);
 
   User.getUserByUserName(username, (err, user) => {
@@ -43,7 +43,7 @@ router.post("/authenticate", (req, res) => {
         message: "User Not Found"
       });
     }
-  
+
     User.comparePassword(password, user.password, (err, isMatch) => {
       if (err) throw err;
       if (isMatch) {
@@ -71,75 +71,68 @@ router.post("/authenticate", (req, res) => {
   });
 });
 
+router.post("/authenticateLDAP", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
 
-// router.post("/authenticateLDAP", (req, res) => {
-//   const username = req.body.username;
-//   const password = req.body.password;
-  
-//   console.log(password);
+  authenticate(username, password, "SQS").then(
+    responseData => {
+      res.send({ status: 200 });
+      console.log("success", responseData);
+    },
+    () => {
+      authenticate(username, password, "SQS-BFSI").then(
+        (responseData) => {
+          res.send({ status: 200 });
+        },
+        () => {
+          authenticate(username, password, "SQS.GROUP.INTL").then(
+            () => {
+              res.send({ status: 200 });
+            },
+            () => {
+              res.send({ status: 400 });
+            }
+          );
+        }
+      );
+    }
+  );
 
-  
-//   authenticate(username,password).then((res) => {
-//     if (isMatch) {
-//       const token = jwt.sign({ data: user }, config.secret, {
-//         expiresIn: 1800 // 30 minutes
-//       });
+  User.getUserByUserName(username, (err, user) => {
+    if (err) throw err;
+    if (!user) {
+      return res.status(400).send({
+        message: "User Not Found"
+      });
+    }
 
-//       res.json({
-//         success: true,
-//         token: "JWT " + token,
-//         user: {
-//           name: user.name,
-//           username: user.username,
-//           emailid: user.emailid,
-//           rolename: user.role
-//         }
-//       });
-//     } else {
-//       res.status(400);
-//       res.send({
-//         message: "Invalid Password, Please enter a valid password"
-//       });
-//     }
-//   } 
-//   ).catch((err) => {
+    User.comparePassword(password, user.password, (err, isMatch) => {
+      if (err) throw err;
+      if (isMatch) {
+        const token = jwt.sign({ data: user }, config.secret, {
+          expiresIn: 1800 // 30 minutes
+        });
 
-//   }
-
-//   User.getUserByUserName(username, (err, user) => {
-//     if (err) throw err;
-//     if (!user) {
-//       return res.status(400).send({
-//         message: "User Not Found"
-//       });
-//     }
-  
-//     User.comparePassword(password, user.password, (err, isMatch) => {
-//       if (err) throw err;
-//       if (isMatch) {
-//         const token = jwt.sign({ data: user }, config.secret, {
-//           expiresIn: 1800 // 30 minutes
-//         });
-
-//         res.json({
-//           success: true,
-//           token: "JWT " + token,
-//           user: {
-//             name: user.name,
-//             username: user.username,
-//             emailid: user.emailid,
-//             rolename: user.role
-//           }
-//         });
-//       } else {
-//         res.status(400);
-//         res.send({
-//           message: "Invalid Password, Please enter a valid password"
-//         });
-//       }
-//     });
-//   });
-// });
+        res.json({
+          success: true,
+          token: "JWT " + token,
+          user: {
+            name: user.name,
+            username: user.username,
+            emailid: user.emailid,
+            rolename: user.role
+          }
+        });
+      } else {
+        res.status(400);
+        res.send({
+          message: "Invalid Password, Please enter a valid password"
+        });
+      }
+    });
+  });
+});
 
 router.get(
   "/profile",
@@ -157,34 +150,32 @@ router.get("/validate", (req, res) => {
   res.send("Validated");
 });
 
-let authenticate = ( username, password ) => {
-  return new promise ((resolve , reject) => {
-    const ldapClient = ldap.createClient(ldapoptions); 
-    ldapClient.on('error', error => {
-     callBack(err);
- });
- 
-    console.log('entering2',username);
-    var ldapdomain = "SQS" + '\\' + username;
-    console.log('ldapdomain',ldapdomain);
-    ldapClient.bind(
-    ldapdomain, password,(err, res)=> {
-        if(err) {
-         callback(err);
-          console.log('error1pandi');
-          return reject(err);
-            }
+let authenticate = (username, password, domain) => {
+  return new promise((resolve, reject) => {
+    const ldapClient = ldap.createClient(ldapoptions);
+    ldapClient.on("error", error => {
+      callBack(error);
+    });
+
+    var ldapdomain = domain + "\\" + username;
+    console.log("ldapdomain", ldapdomain);
+    ldapClient.bind(ldapdomain, password, (err, res) => {
+      if (err) {
+        callback(err);
+
+        return reject(err);
+      }
       //  ldapClient.destroy();
-        return resolve(res);
+      return resolve(res);
     });
     ldapClient.destroy();
- });
- }
- const ldapoptions = {
-  url: 'LDAP://192.168.65.5:389',
+  });
+};
+const ldapoptions = {
+  url: "LDAP://192.168.65.5:389",
   idleTimeout: 1000000,
-  reconnect:true
- }
+  reconnect: true
+};
 
 router.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
